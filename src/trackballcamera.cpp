@@ -53,7 +53,7 @@ void TrackballCamera::move(float dx, float dy)
 
     constexpr float speed = 2.0f;
 
-    m_target += (-dx * right + dy * up) * speed * m_radius;
+    m_target += (-dx * right - dy * up) * speed * m_radius;
 }
 
 void TrackballCamera::zoom(float delta)

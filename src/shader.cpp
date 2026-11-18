@@ -13,11 +13,12 @@ using namespace std;
 
 #include "shader.h"
 
-GLuint load_shaders(const char* vertex_file_path, const char* fragment_file_path)
+GLuint load_shaders(const char* vertex_file_path, const char* fragment_file_path, const char* geometry_file_path)
 {
-    GLuint vertexShaderID, fragmentShaderID;
+    GLuint vertexShaderID, fragmentShaderID, geometryShaderID;
     vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
     fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+    geometryShaderID = glCreateShader(GL_GEOMETRY_SHADER);
 
     // Reads the Vertex Shader code from the vertex shader file. Check the documentation of ifstream and stringstream to learn more.
     // https://en.cppreference.com/cpp/io/basic_ifstream : input operations on files
@@ -54,6 +55,24 @@ GLuint load_shaders(const char* vertex_file_path, const char* fragment_file_path
     {
         //Note the lack of \n.
         std::cout << "You got the vertex shader correct. How did you open the wrong fragment shader file : " << fragment_file_path << "?" << std::endl;
+        getchar();
+        exit(1);
+    }
+
+    // Reads the Fragment Shader code from the file
+    std::string geometryShaderCode;
+    std::ifstream geometryShaderStream(geometry_file_path, std::ios::in);
+    if(geometryShaderStream.is_open())
+    {
+        std::stringstream sstr;
+        sstr << geometryShaderStream.rdbuf();
+        geometryShaderCode = sstr.str();
+        geometryShaderStream.close();
+    }
+    else
+    {
+        //Note the lack of \n.
+        std::cout << "You really suck at this don't you? I don't recognize this file : " << geometry_file_path << "..." << std::endl;
         getchar();
         exit(1);
     }
@@ -109,6 +128,24 @@ GLuint load_shaders(const char* vertex_file_path, const char* fragment_file_path
         printf("Fragment shader of ID %d compiled successfully\n", fragmentShaderID);
     }
 
+    char const * GeometrySourcePointer = geometryShaderCode.c_str();
+    glShaderSource(geometryShaderID, 1, &GeometrySourcePointer , NULL);
+    glCompileShader(geometryShaderID);
+
+    // Check Geometry Shader compile output.
+    glGetShaderiv(geometryShaderID, GL_COMPILE_STATUS, &compileResult);
+    glGetShaderiv(geometryShaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+    if ( infoLogLength > 0 )
+    {
+        std::vector<char> GeometryShaderErrorMessage(infoLogLength+1);
+        glGetShaderInfoLog(geometryShaderID, infoLogLength, NULL, &GeometryShaderErrorMessage[0]);
+        printf("%s\n", &GeometryShaderErrorMessage[0]);
+    }
+    else
+    {
+        printf("Geometry shader of ID %d compiled successfully\n", geometryShaderID);
+    }
+
     // Link the program
     printf("Linking program\n");
 
@@ -122,6 +159,7 @@ GLuint load_shaders(const char* vertex_file_path, const char* fragment_file_path
     // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glAttachShader.xhtml
     glAttachShader(ProgramID, vertexShaderID);
     glAttachShader(ProgramID, fragmentShaderID);
+    glAttachShader(ProgramID, geometryShaderID);
 
     // Get OpenGL to deal with linking all shaders to your GPU using glLinkProgram.
     // https://registry.khronos.org/OpenGL-Refpages/gl4/html/glLinkProgram.xhtml
@@ -145,10 +183,12 @@ GLuint load_shaders(const char* vertex_file_path, const char* fragment_file_path
     // Detach them with glDetachShader: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDetachShader.xhtml
     glDetachShader(ProgramID, vertexShaderID);
     glDetachShader(ProgramID, fragmentShaderID);
+    glDetachShader(ProgramID, geometryShaderID);
 
     // And remove them with glDeleteShader: https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDeleteShader.xhtml
     glDeleteShader(vertexShaderID);
     glDeleteShader(fragmentShaderID);
+    glDeleteShader(geometryShaderID);
 
     return ProgramID;
 }

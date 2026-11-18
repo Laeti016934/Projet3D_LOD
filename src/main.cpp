@@ -45,7 +45,7 @@ int main(int argc, char ** argv)
 
     //Creating the dictionary of the scene
     Mesh sphereMesh;
-    sphereMesh.load("data/unit_sphere_n.off");
+    sphereMesh.load("data/elephant_n.off");
     Scene::MeshID sphereID = g_mainScene.addMesh(sphereMesh);
 
     Mesh squareMesh;

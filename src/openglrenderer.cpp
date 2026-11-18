@@ -43,7 +43,7 @@ void OpenGLRenderer::initialize()
         fprintf(stderr, "Failed to initialize GLEW\n");
         return;
     }
-    m_programID = load_shaders("vertex_shader.glsl", "fragment_shader.glsl");
+    m_programID = load_shaders("vertex_shader.glsl", "fragment_shader.glsl", "geometry_shader.glsl");
     fetchUniformLocations();
 }
 

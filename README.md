@@ -26,4 +26,4 @@ make
 
 Execution 
 ------------
-./tp
+./bin/projet
